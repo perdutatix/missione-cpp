@@ -330,7 +330,22 @@ function gioco(L, salvato, rete) {
 
   // ---------- Progressi (online, nella tabella progressi) ----------
   const nuovoStato = () => ({ v: 1, livelli: {}, missioni: {}, sbagli: {}, ripasso: [], ripassati: 0, badge: {}, primaGiusta: false });
-  const daSalvato = s => Object.assign(nuovoStato(), s && s.v === 1 ? s : {});
+  // Lo stato arriva dal database e il tutor vede anche quello degli studenti: lo ricostruisco campo per campo,
+  // con solo numeri e testi, così nessun valore salvato a mano può finire nella pagina come markup.
+  function daSalvato(s) {
+    const n = nuovoStato();
+    if (!s || s.v !== 1) return n;
+    const num = x => (Number.isFinite(+x) ? +x : 0);
+    const voci = o => (o && typeof o === "object" ? Object.entries(o).filter(([k]) => k !== "__proto__") : []);
+    voci(s.livelli).forEach(([k, r]) => { n.livelli[k] = { best: num(r && r.best), data: num(r && r.data) }; });
+    voci(s.missioni).forEach(([k, v]) => { if (v) n.missioni[k] = num(v) || 1; });
+    voci(s.sbagli).forEach(([k, v]) => { n.sbagli[k] = num(v); });
+    voci(s.badge).forEach(([k, v]) => { if (v) n.badge[k] = num(v) || 1; });
+    n.ripasso = Array.isArray(s.ripasso) ? s.ripasso.map(String) : [];
+    n.ripassati = num(s.ripassati);
+    n.primaGiusta = !!s.primaGiusta;
+    return n;
+  }
   let S = daSalvato(salvato);
   // Il tutor può guardare la pagella di uno studente: S diventa per un momento lo stato dello studente
   // (sola lettura, non si salva) e torna il proprio appena si esce dalla Pagella.
