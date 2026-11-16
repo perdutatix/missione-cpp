@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Missione C++</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232b6cb0'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-size='12' fill='white' text-anchor='middle'%3EC++%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: quaderno a quadretti; i riquadri riprendono quelli della dispensa (ATTENZIONE arancio, intestazioni blu),
+   le missioni sono una finestra console di Dev-C++. Una colonna centrale, griglie che si impilano sotto i 400px. */
+:root {
+  --bg: #f6f7f3; --grid: rgba(46, 111, 176, .07); --surface: #ffffff; --ink: #1c2331; --muted: #586274; --line: #d8dee6;
+  --accent: #2b6cb0; --accent-soft: #e5eef9; --on-accent: #ffffff;
+  --warn: #a95a0c; --warn-soft: #fcefdf; --ok: #2a7444; --ok-soft: #e5f3e9; --bad: #b3382c; --bad-soft: #fae7e4;
+  --star: #c98f00; --code-bg: #eff1ec; --scrim: rgba(15, 20, 30, .45);
+  --console-bg: #0c0c0c; --console-bar: #2a2a2a; --console-ink: #cccccc; --console-dim: #8f8f8f; --console-inp: #1b1b1b;
+  --console-line: #3c3c3c; --console-ok: #8fe39f; --console-bad: #ff9d90;
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-code: "JetBrains Mono", Consolas, "Courier New", monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10141b; --grid: rgba(120, 170, 230, .06); --surface: #18202a; --ink: #e4e9f0; --muted: #9aa5b6; --line: #2a3442;
+    --accent: #6aa6e6; --accent-soft: #1b2b3f; --on-accent: #0a1320;
+    --warn: #f0a55a; --warn-soft: #2b2015; --ok: #6cc48b; --ok-soft: #14291c; --bad: #f07a6b; --bad-soft: #2d1916;
+    --star: #f2c14e; --code-bg: #0d1218; --scrim: rgba(0, 0, 0, .6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10141b; --grid: rgba(120, 170, 230, .06); --surface: #18202a; --ink: #e4e9f0; --muted: #9aa5b6; --line: #2a3442;
+  --accent: #6aa6e6; --accent-soft: #1b2b3f; --on-accent: #0a1320;
+  --warn: #f0a55a; --warn-soft: #2b2015; --ok: #6cc48b; --ok-soft: #14291c; --bad: #f07a6b; --bad-soft: #2d1916;
+  --star: #f2c14e; --code-bg: #0d1218; --scrim: rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.55;
+}
+.app {
+  max-width: 1040px; margin: 0 auto; padding-block: 20px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 18px;
+}
+h1, h2, h3, h4 { font-family: var(--f-display); line-height: 1.2; margin: 0; text-wrap: balance; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.12rem; }
+h4 { font-size: .95rem; }
+p { margin: 0; }
+a { color: var(--accent); }
+code { font-family: var(--f-code); font-size: .9em; background: var(--code-bg); padding: .05em .35em; border-radius: 4px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.eyebrow { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.muted { color: var(--muted); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Testata */
+.top { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+.brand { display: flex; gap: 12px; align-items: center; }
+.logo { font-family: var(--f-display); font-weight: 700; background: var(--accent); color: var(--on-accent); border-radius: 10px; padding: 8px 10px; font-size: 1.1rem; }
+.brand h1 { font-size: 1.55rem; }
+.brand p { color: var(--muted); font-size: .9rem; }
+.hud { display: flex; flex-wrap: wrap; gap: 10px; }
+.hud-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 12px; display: grid; gap: 2px; min-width: 0; }
+.hud-item strong { font-family: var(--f-display); font-variant-numeric: tabular-nums; }
+.hud-xp { min-width: 190px; }
+.hud-xp small { color: var(--muted); font-size: .75rem; }
+.xpbar { height: 8px; border-radius: 99px; background: var(--code-bg); overflow: hidden; }
+.xpbar span { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabs a { text-decoration: none; color: var(--ink); border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 14px; font-weight: 500; font-size: .92rem; display: inline-flex; gap: 6px; align-items: center; }
+.tabs a[aria-current="page"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.count { background: var(--bad); color: var(--on-accent); border-radius: 99px; font-size: .72rem; padding: 0 7px; font-weight: 700; }
+.count:empty { display: none; }
+#view { display: grid; gap: 18px; outline: none; }
+
+/* Blocchi comuni */
+.intro { display: grid; gap: 6px; max-width: 68ch; }
+.intro p { color: var(--muted); }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; padding: 0; margin: 0; list-style: none; counter-reset: s; }
+.steps li { counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 2px; }
+.steps li::before { content: counter(s); font-family: var(--f-display); font-weight: 700; color: var(--accent); }
+.steps li span { color: var(--muted); font-size: .9rem; }
+.btn { font: inherit; font-weight: 600; background: var(--accent); color: var(--on-accent); border: 1px solid var(--accent); border-radius: 8px; padding: 9px 16px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.small { padding: 6px 12px; font-size: .88rem; }
+.btn.danger { color: var(--bad); }
+.btn[disabled] { opacity: .5; cursor: default; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.link { font: inherit; background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; }
+.code { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--f-code); font-size: .86rem; line-height: 1.5; }
+.code code { background: none; padding: 0; font-size: inherit; }
+.codebox { position: relative; }
+.codebox .code { padding-right: 76px; }
+.copia { position: absolute; top: 6px; right: 6px; font: inherit; font-size: .75rem; font-weight: 600; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+.copia:hover { border-color: var(--accent); }
+.copia.fatto { color: var(--ok); border-color: var(--ok); }
+.box { border-left: 4px solid; border-radius: 0 8px 8px 0; padding: 10px 12px; display: grid; gap: 4px; }
+.box b { font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; }
+.box.warn { background: var(--warn-soft); border-color: var(--warn); }
+.box.warn b { color: var(--warn); }
+.box.ok { background: var(--ok-soft); border-color: var(--ok); }
+.box.ok > b { color: var(--ok); }
+.box.bad { background: var(--bad-soft); border-color: var(--bad); }
+.box.bad > b { color: var(--bad); }
+.stars { letter-spacing: 2px; color: var(--line); font-size: 1.05rem; white-space: nowrap; }
+.stars .on { color: var(--star); }
+.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 12px; justify-items: start; color: var(--muted); }
+
+/* Mappa */
+.next { display: grid; gap: 2px; text-decoration: none; color: var(--ink); background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--r); padding: 14px 16px; }
+.next strong { font-family: var(--f-display); font-size: 1.15rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.lvl { display: grid; gap: 4px; align-content: start; text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; transition: border-color .15s, transform .15s; }
+.lvl:hover { border-color: var(--accent); transform: translateY(-2px); }
+.lvl-n { font-family: var(--f-display); font-weight: 700; font-size: 1.9rem; color: var(--accent); line-height: 1; }
+.lvl-t { font-family: var(--f-display); font-weight: 600; font-size: 1.1rem; }
+.lvl-c { color: var(--muted); font-size: .85rem; }
+.lvl-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-size: .82rem; color: var(--muted); margin-top: 6px; }
+
+/* Livello */
+.back { text-decoration: none; font-weight: 500; justify-self: start; }
+.lvl-head { display: grid; gap: 6px; max-width: 70ch; }
+.lvl-head p { color: var(--muted); }
+.subtabs { display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+.subtabs a { text-decoration: none; color: var(--ink); border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 14px; display: grid; line-height: 1.3; }
+.subtabs a small { color: var(--muted); font-size: .75rem; }
+.subtabs a[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.cards { display: grid; gap: 12px; }
+.term { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.term header { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; align-items: baseline; }
+.term h3 { color: var(--accent); }
+.pag { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Sfida */
+.quiz { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 14px; }
+.quiz-top { display: flex; justify-content: space-between; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { height: 6px; background: var(--code-bg); border-radius: 99px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--accent); transition: width .3s; }
+.q { display: grid; gap: 12px; }
+.q-t { font-weight: 600; font-size: 1.05rem; }
+.opts { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
+.opt { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; cursor: pointer; }
+.opt input { margin-top: 4px; accent-color: var(--accent); }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.opt.is-ok { border-color: var(--ok); background: var(--ok-soft); }
+.opt.is-bad { border-color: var(--bad); background: var(--bad-soft); }
+.inp { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; width: 100%; min-width: 0; }
+.mono { font-family: var(--f-code); }
+.match { display: grid; gap: 8px; }
+.mrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 8px; align-items: center; }
+.chipcode { font-family: var(--f-code); font-size: .88rem; background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; overflow-wrap: anywhere; }
+.hint { color: var(--warn); font-weight: 500; }
+.fb { display: grid; gap: 10px; }
+.fb:empty { display: none; }
+.fb-links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; }
+.result { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 10px; justify-items: start; max-width: 640px; }
+.result h3 { font-size: 1.5rem; }
+.result .stars { font-size: 1.8rem; }
+.rec { color: var(--ok); font-weight: 600; }
+
+/* Missioni: finestra console di Dev-C++ */
+.missions { display: grid; gap: 16px; }
+.mission { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.mission h3 { font-size: 1.2rem; }
+.done { color: var(--ok); }
+.req { margin: 0; padding-left: 1.2em; display: grid; gap: 2px; }
+.aiuto summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+.aiuto p { padding: 6px 0 0 16px; color: var(--muted); }
+.console { background: var(--console-bg); color: var(--console-ink); border-radius: 8px; overflow: hidden; font-family: var(--f-code); font-size: .88rem; }
+.console-bar { background: var(--console-bar); color: var(--console-dim); padding: 6px 12px; font-size: .78rem; overflow-wrap: anywhere; }
+.prove { padding: 14px; display: grid; gap: 8px; }
+.prove .c-intro { color: var(--console-dim); }
+.prove label { color: var(--console-ink); }
+.prove code { background: var(--console-inp); color: var(--console-ink); }
+.c-line { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.c-inp { font: inherit; background: var(--console-inp); color: #f2f2f2; border: 1px solid var(--console-line); border-radius: 4px; padding: 6px 8px; flex: 1 1 160px; min-width: 0; }
+.c-inp:disabled { opacity: .85; }
+.c-res { font-weight: 600; }
+.c-res.ok { color: var(--console-ok); }
+.c-res.bad { color: var(--console-bad); }
+.prove .btn { justify-self: start; margin-top: 4px; }
+
+/* Glossario */
+.filters { display: grid; gap: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: .85rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+/* Pagella */
+.pag-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 4px; }
+.big { font-family: var(--f-display); font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.tabwrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+th { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+.top5 { margin: 0; padding-left: 1.4em; display: grid; gap: 4px; }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.badge { border: 1px dashed var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; gap: 2px; color: var(--muted); }
+.badge strong { font-family: var(--f-display); }
+.badge.on { border: 1px solid var(--star); background: var(--surface); color: var(--ink); }
+.badge.on strong::before { content: "★ "; color: var(--star); }
+.riep { font-family: var(--f-code); font-size: .82rem; width: 100%; min-height: 220px; background: var(--code-bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+
+/* Finestra del termine e avvisi */
+dialog { border: 1px solid var(--line); border-radius: 12px; padding: 0; width: min(560px, calc(100% - 32px)); background: var(--surface); color: var(--ink); }
+dialog::backdrop { background: var(--scrim); }
+.dlg-in { padding: 6px; display: grid; gap: 6px; }
+.dlg-in .term { border: 0; }
+.dlg-in .btn { margin: 0 16px 14px; justify-self: end; }
+#toast {
+  position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 16px);
+  background: var(--ink); color: var(--bg); border-radius: 10px; padding: 10px 16px; font-weight: 600; font-size: .92rem;
+  opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; max-width: calc(100% - 32px); text-align: center; z-index: 20;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* Accesso, avvisi di rete, utente */
+.ingresso { max-width: 420px; margin: 0 auto; padding: 48px 16px; display: grid; gap: 20px; }
+.ingresso form { display: grid; gap: 8px; }
+.ingresso form .btn { margin-top: 8px; }
+.ingresso label { font-weight: 600; font-size: .9rem; }
+.chi { margin-left: auto; display: inline-flex; gap: 10px; align-items: center; font-size: .9rem; color: var(--muted); }
+.guardo { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.guardo select { width: auto; }
+@media (max-width: 480px) {
+  .mrow { grid-template-columns: 1fr; gap: 4px; }
+  .hud-xp { min-width: 0; flex: 1 1 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<main class="ingresso" id="ingresso">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">C++</span>
+    <div>
+      <h1>Missione C++</h1>
+      <p>Le parole della dispensa, livello per livello</p>
+    </div>
+  </div>
+  <p id="avvio" class="muted" role="status">Caricamento…</p>
+  <form id="accedi" class="panel" hidden>
+    <h2>Accedi</h2>
+    <label for="email">Email</label>
+    <input id="email" class="inp" type="email" autocomplete="username" required>
+    <label for="pw">Password</label>
+    <input id="pw" class="inp" type="password" autocomplete="current-password" required>
+    <button class="btn" type="submit">Entra</button>
+    <p id="accedi-msg" class="hint" role="alert"></p>
+    <p class="muted">L'account te lo dà il tutor.</p>
+  </form>
+</main>
+
+<div class="app" hidden>
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">C++</span>
+      <div>
+        <h1>Missione C++</h1>
+        <p>Le parole della dispensa, livello per livello</p>
+      </div>
+    </div>
+    <div class="hud" id="hud"></div>
+  </header>
+  <nav class="tabs" aria-label="Sezioni">
+    <a href="#mappa" data-sez="mappa">Mappa</a>
+    <a href="#glossario" data-sez="glossario">Glossario</a>
+    <a href="#ripasso" data-sez="ripasso">Da ripassare <span class="count" id="nRip"></span></a>
+    <a href="#pagella" data-sez="pagella">Pagella</a>
+    <span class="chi"><span id="chi"></span><button class="link" type="button" id="esci">Esci</button></span>
+  </nav>
+  <div class="box bad" id="rete" role="alert" hidden>
+    <b>Progressi non salvati</b>
+    <p>Controlla la connessione. Riprovo da solo alla prossima risposta, oppure <button class="link" type="button" id="riprova-rete">riprova adesso</button>.</p>
+  </div>
+  <main id="view" tabindex="-1"></main>
+</div>
+
+<dialog id="dlg" aria-label="Termine">
+  <div class="dlg-in">
+    <div id="dlg-body"></div>
+    <button class="btn" type="button" id="dlg-close">Chiudi</button>
+  </div>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
+<script src="config.js"></script>
+<script>
+// Il gioco. Parte solo dopo l'accesso, con i livelli e lo stato scaricati da Supabase (vedi in fondo).
+// rete = { nome, tutor, salva(S), studenti(), statoDi(id), esci() }
+function gioco(L, salvato, rete) {
+  "use strict";
+  // Tutto il testo che finisce nella pagina passa da esc() o fmt(): i contenuti sono nostri e
+  // l'unico input di chi gioca (la ricerca nel glossario) viene sempre escapato prima di essere mostrato.
+  const view = document.getElementById("view");
+
+  // ---------- Dati derivati ----------
+  const TERM = {};
+  L.forEach(lv => lv.termini.forEach(t => { TERM[t.id] = Object.assign({ liv: lv.id }, t); }));
+  const MISSIONI = [];
+  L.forEach(lv => (lv.missioni || []).forEach(m => MISSIONI.push(Object.assign({ liv: lv.id }, m))));
+  const BADGE = [{ id: "primo", nome: "Primo passo", desc: "La prima risposta giusta" }]
+    .concat(L.map(lv => ({ id: "liv" + lv.id, nome: lv.badge, desc: "3 stelle nel livello " + lv.id })))
+    .concat([
+      { id: "missione1", nome: "Ha compilato!", desc: "La prima missione in Dev-C++" },
+      { id: "missioni", nome: "Tutte le missioni", desc: "Tutte le " + MISSIONI.length + " missioni completate" },
+      { id: "ripasso", nome: "Ripasso fatto", desc: "5 termini ripassati dal mazzo" }
+    ]);
+  const GRADI = [[0, "Matricola"], [150, "Apprendista"], [400, "Programmatore junior"], [700, "Programmatore"], [1000, "Esperto di C++"], [1300, "Maestro del C++"]];
+
+  // ---------- Progressi (online, nella tabella progressi) ----------
+  const nuovoStato = () => ({ v: 1, livelli: {}, missioni: {}, sbagli: {}, ripasso: [], ripassati: 0, badge: {}, primaGiusta: false });
+  const daSalvato = s => Object.assign(nuovoStato(), s && s.v === 1 ? s : {});
+  let S = daSalvato(salvato);
+  // Il tutor può guardare la pagella di uno studente: S diventa per un momento lo stato dello studente
+  // (sola lettura, non si salva) e torna il proprio appena si esce dalla Pagella.
+  let mio = null, guardo = null, studenti = null;
+  function salva() { if (!guardo) rete.salva(S); }
+
+  // ---------- Utilità ----------
+  const $ = (s, r) => (r || document).querySelector(s);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const fmt = s => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
+  const codice = s => `<div class="codebox"><pre class="code"><code>${esc(s)}</code></pre><button type="button" class="copia" data-copia>Copia</button></div>`;
+  // Unico punto in cui si inserisce markup: riceve solo stringhe costruite con esc()/fmt().
+  const metti = (el, markup) => el.replaceChildren(document.createRange().createContextualFragment(markup));
+  function mescola(a) {
+    a = a.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+  const norm = s => String(s).trim().toLowerCase().replace(/\s+/g, "");
+  const stelleDa = p => (p >= 1 ? 3 : p >= 0.8 ? 2 : p >= 0.5 ? 1 : 0);
+  function stelle(lv) { const r = S.livelli[lv.id]; return r ? stelleDa(r.best / lv.domande.length) : 0; }
+  const totStelle = () => L.reduce((t, lv) => t + stelle(lv), 0);
+  const missioniFatte = () => MISSIONI.filter(m => S.missioni[m.id]).length;
+  function punti() {
+    let x = 0;
+    L.forEach(lv => { const r = S.livelli[lv.id]; if (r) x += r.best * 10; });
+    return x + missioniFatte() * 50;
+  }
+  function grado(x) {
+    let i = 0;
+    GRADI.forEach((g, k) => { if (x >= g[0]) i = k; });
+    const n = GRADI[i + 1];
+    return { nome: GRADI[i][1], da: GRADI[i][0], a: n ? n[0] : null, prossimo: n ? n[1] : null };
+  }
+  const starsHtml = n => `<span class="stars" role="img" aria-label="${n} stelle su 3">${[1, 2, 3].map(i => `<span${i <= n ? ' class="on"' : ""}>★</span>`).join("")}</span>`;
+
+  let toastTimer;
+  function toast(msg) {
+    const t = $("#toast");
+    t.textContent = t.classList.contains("show") && t.textContent ? t.textContent + " · " + msg : msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.classList.remove("show"); t.textContent = ""; }, 3200);
+  }
+
+  function controllaBadge() {
+    const nuovi = [];
+    const dai = id => { if (!S.badge[id]) { S.badge[id] = Date.now(); nuovi.push(BADGE.find(b => b.id === id)); } };
+    if (S.primaGiusta) dai("primo");
+    L.forEach(lv => { if (stelle(lv) === 3) dai("liv" + lv.id); });
+    const nm = missioniFatte();
+    if (nm >= 1) dai("missione1");
+    if (nm === MISSIONI.length) dai("missioni");
+    if (S.ripassati >= 5) dai("ripasso");
+    salva();
+    if (nuovi.length) toast("Nuovo badge: " + nuovi.map(b => b.nome).join(", "));
+    return nuovi;
+  }
+
+  function hud() {
+    const x = punti(), g = grado(x);
+    const pct = g.a ? Math.round((x - g.da) / (g.a - g.da) * 100) : 100;
+    metti($("#hud"), `
+      <div class="hud-item"><span class="eyebrow">Grado</span><strong>${esc(g.nome)}</strong></div>
+      <div class="hud-item hud-xp"><span class="eyebrow">${x} punti</span>
+        <div class="xpbar" role="progressbar" aria-label="Verso il prossimo grado" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><span style="width:${pct}%"></span></div>
+        <small>${g.a ? `${g.a - x} punti al grado «${esc(g.prossimo)}»` : "Grado massimo raggiunto"}</small></div>
+      <div class="hud-item"><span class="eyebrow">Stelle</span><strong>★ ${totStelle()} / ${L.length * 3}</strong></div>`);
+    const n = S.ripasso.filter(id => TERM[id]).length;
+    $("#nRip").textContent = n ? String(n) : "";
+  }
+
+  function cardTermine(t, conLivello, conRipasso) {
+    return `<article class="term">
+      <header><h3>${esc(t.t)}</h3><span class="pag">${conLivello ? `Livello ${t.liv} · ` : ""}Dispensa p. ${esc(t.p)}</span></header>
+      <p>${fmt(t.def)}</p>
+      ${t.es ? codice(t.es) : ""}
+      ${t.att ? `<div class="box warn"><b>Attenzione</b><p>${fmt(t.att)}</p></div>` : ""}
+      ${conRipasso ? `<button class="btn ghost small" type="button" data-ripassato="${esc(t.id)}">L'ho ripassato ✓</button>` : ""}
+    </article>`;
+  }
+
+  // ---------- Viste ----------
+  function vistaMappa() {
+    const cons = L.find(lv => stelle(lv) < 2) || L[L.length - 1];
+    metti(view, `
+      <section class="intro">
+        <h2>La mappa</h2>
+        <p>Ogni livello è un pezzo della dispensa. I progressi si salvano online: li ritrovi anche su un altro computer o sul telefono.</p>
+      </section>
+      <ol class="steps">
+        <li><strong>Impara</strong><span>Leggi i termini del livello, con esempi e pagina della dispensa.</span></li>
+        <li><strong>Sfida</strong><span>Rispondi alle domande. Più risposte giuste, più stelle e punti.</span></li>
+        <li><strong>Missioni</strong><span>Scrivi il programma al PC in Dev-C++ e controlla qui che cosa stampa.</span></li>
+      </ol>
+      <a class="next" href="#livello-${cons.id}">
+        <span class="eyebrow">Prossimo consigliato</span>
+        <strong>Livello ${cons.id} · ${esc(cons.titolo)}</strong>
+        <span class="muted">Dispensa ${esc(cons.capitoli)}, ${esc(cons.pagine)}</span>
+      </a>
+      <div class="grid">${L.map(lv => {
+        const ms = lv.missioni || [];
+        const md = ms.filter(m => S.missioni[m.id]).length;
+        return `<a class="lvl" href="#livello-${lv.id}">
+          <span class="lvl-n">${lv.id}</span>
+          <span class="lvl-t">${esc(lv.titolo)}</span>
+          <span class="lvl-c">Dispensa ${esc(lv.capitoli)} · ${esc(lv.pagine)}</span>
+          <span class="lvl-meta">${starsHtml(stelle(lv))}<span>${lv.termini.length} termini</span><span>Missioni ${md}/${ms.length}</span></span>
+        </a>`;
+      }).join("")}</div>`);
+  }
+
+  function vistaLivello(id, tab) {
+    const lv = L.find(x => x.id === id);
+    if (!lv) { location.hash = "mappa"; return; }
+    const ms = lv.missioni || [];
+    const tabs = [["impara", "Impara", lv.termini.length + " termini"], ["sfida", "Sfida", lv.domande.length + " domande"], ["missioni", "Missioni", ms.length + " in Dev-C++"]];
+    metti(view, `
+      <a class="back" href="#mappa">← Mappa</a>
+      <header class="lvl-head">
+        <span class="eyebrow">Livello ${lv.id} · dispensa ${esc(lv.capitoli)}, ${esc(lv.pagine)}</span>
+        <h2>${esc(lv.titolo)}</h2>
+        <p>${fmt(lv.intro)}</p>
+        ${starsHtml(stelle(lv))}
+      </header>
+      <nav class="subtabs" aria-label="Parti del livello">${tabs.map(t => `<a href="#livello-${id}-${t[0]}" aria-selected="${t[0] === tab}"><b>${t[1]}</b><small>${t[2]}</small></a>`).join("")}</nav>
+      <section id="pane"></section>`);
+    const pane = $("#pane");
+    if (tab === "impara") {
+      metti(pane, `<div class="cards">${lv.termini.map(t => cardTermine(t)).join("")}</div>
+        <div class="row" style="margin-top:16px"><a class="btn" href="#livello-${id}-sfida">Ho letto: vai alla sfida →</a></div>`);
+    } else if (tab === "sfida") {
+      avviaSfida(lv, pane);
+    } else {
+      metti(pane, `<div class="missions">${ms.map(cardMissione).join("")}</div>`);
+      collegaMissioni(pane);
+    }
+  }
+
+  // ---------- Sfida ----------
+  function avviaSfida(lv, pane) {
+    const qs = lv.domande.map(q => {
+      const c = Object.assign({}, q);
+      if (q.tipo === "scelta") c.ord = mescola(q.opzioni.map((o, k) => k));
+      if (q.tipo === "abbina") c.destra = mescola(q.coppie.map(p => p[1]));
+      return c;
+    });
+    let i = 0, giuste = 0;
+
+    function corpo(q) {
+      if (q.tipo === "scelta") {
+        return `<fieldset class="opts"><legend class="sr">Scegli una risposta</legend>${q.ord.map((k, j) =>
+          `<label class="opt"><input type="radio" name="o" id="o${j}" value="${k}"><span>${fmt(q.opzioni[k])}</span></label>`).join("")}</fieldset>`;
+      }
+      if (q.tipo === "completa") {
+        return `<label for="fill" class="muted">Scrivi solo quello che va al posto di ___</label>
+          <input id="fill" class="inp mono" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">`;
+      }
+      return `<div class="match">${q.coppie.map((p, j) => `<label class="mrow" for="m${j}"><span class="chipcode">${esc(p[0])}</span>
+        <select id="m${j}" class="inp"><option value="">Scegli…</option>${q.destra.map((d, k) => `<option value="${k}">${esc(d)}</option>`).join("")}</select></label>`).join("")}</div>`;
+    }
+
+    function mostra() {
+      const q = qs[i];
+      metti(pane, `<div class="quiz">
+        <div class="quiz-top"><span>Domanda ${i + 1} di ${qs.length}</span><span>Giuste: ${giuste}</span></div>
+        <div class="bar"><span style="width:${i / qs.length * 100}%"></span></div>
+        <form class="q" id="qf" novalidate>
+          <p class="q-t">${fmt(q.testo)}</p>
+          ${q.codice ? codice(q.codice) : ""}
+          ${corpo(q)}
+          <div class="row" id="qact"><button class="btn" type="submit">Controlla</button></div>
+          <div class="fb" id="fb" aria-live="polite"></div>
+        </form></div>`);
+      $("#qf").addEventListener("submit", e => { e.preventDefault(); verifica(q); });
+    }
+
+    function avviso(fb, testo) { const p = document.createElement("p"); p.className = "hint"; p.textContent = testo; fb.replaceChildren(p); }
+
+    function verifica(q) {
+      const fb = $("#fb");
+      let ok;
+      if (q.tipo === "scelta") {
+        const sel = pane.querySelector('input[name="o"]:checked');
+        if (!sel) { avviso(fb, "Scegli una risposta."); return; }
+        ok = +sel.value === 0;
+      } else if (q.tipo === "completa") {
+        const v = $("#fill").value;
+        if (!v.trim()) { avviso(fb, "Scrivi la risposta nel riquadro."); return; }
+        ok = q.risposte.some(r => norm(r) === norm(v));
+      } else {
+        const sels = [...pane.querySelectorAll(".match select")];
+        if (sels.some(s => s.value === "")) { avviso(fb, "Completa tutti gli abbinamenti."); return; }
+        ok = sels.every((s, j) => q.destra[+s.value] === q.coppie[j][1]);
+      }
+      pane.querySelectorAll("#qf input, #qf select").forEach(el => { el.disabled = true; });
+      $("#qact").remove();
+
+      const ids = q.termini || [q.termine];
+      if (ok) { giuste++; S.primaGiusta = true; }
+      else ids.forEach(id => { S.sbagli[id] = (S.sbagli[id] || 0) + 1; if (!S.ripasso.includes(id)) S.ripasso.push(id); });
+      salva();
+      hud();
+
+      if (q.tipo === "scelta") {
+        pane.querySelectorAll(".opt input").forEach(inp => {
+          const lab = inp.closest(".opt");
+          if (+inp.value === 0) lab.classList.add("is-ok");
+          else if (inp.checked) lab.classList.add("is-bad");
+        });
+      }
+      let giusta = "";
+      if (!ok && q.tipo === "completa") giusta = `<p>Risposta giusta: <code>${esc(q.risposte[0])}</code></p>`;
+      if (!ok && q.tipo === "abbina") giusta = `<p>Abbinamenti giusti:<br>${q.coppie.map(p => `<code>${esc(p[0])}</code> → ${esc(p[1])}`).join("<br>")}</p>`;
+      const uniq = [...new Set(ids)].filter(id => TERM[id]);
+      metti(fb, `<div class="box ${ok ? "ok" : "bad"}">
+          <b>${ok ? "Giusto!" : "Non proprio"}</b>${giusta}<p>${fmt(q.perche)}</p>
+          ${uniq.length ? `<div class="fb-links">${uniq.map(id => `<button type="button" class="link" data-t="${esc(id)}">Rivedi: ${esc(TERM[id].t)}</button>`).join("")}</div>` : ""}
+        </div>
+        <div class="row"><button class="btn" type="button" id="avanti">${i + 1 < qs.length ? "Avanti →" : "Vedi il risultato"}</button></div>`);
+      const av = $("#avanti");
+      av.addEventListener("click", () => { i++; if (i < qs.length) mostra(); else fine(); });
+      av.focus();
+    }
+
+    function fine() {
+      const prima = S.livelli[lv.id] ? S.livelli[lv.id].best : 0;
+      const record = giuste > prima;
+      if (record) S.livelli[lv.id] = { best: giuste, data: Date.now() };
+      salva();
+      const nuovi = controllaBadge();
+      hud();
+      const p = giuste / qs.length;
+      const msg = p >= 1 ? "Perfetto, tutte giuste: questo livello è tuo."
+        : p >= 0.8 ? "Ottimo. Rileggi i termini che hai sbagliato e riprova per le 3 stelle."
+        : p >= 0.5 ? "Ci sei quasi. I termini sbagliati li trovi in «Da ripassare»."
+        : "Rileggi prima i termini in «Impara», poi riprova: al secondo giro va meglio.";
+      metti(pane, `<div class="result">
+        <span class="eyebrow">Sfida completata</span>
+        <h3>${giuste} giuste su ${qs.length}</h3>
+        ${starsHtml(stelleDa(p))}
+        <p>${msg}</p>
+        ${record ? `<p class="rec">Nuovo record: +${(giuste - prima) * 10} punti</p>` : ""}
+        ${nuovi.length ? `<p>Badge sbloccati: <strong>${nuovi.map(b => esc(b.nome)).join(", ")}</strong></p>` : ""}
+        <div class="row">
+          <button class="btn" type="button" id="riprova">Riprova</button>
+          <a class="btn ghost" href="#livello-${lv.id}-missioni">Vai alle missioni</a>
+          <a class="btn ghost" href="#mappa">Torna alla mappa</a>
+        </div></div>`);
+      $("#riprova").addEventListener("click", () => avviaSfida(lv, pane));
+    }
+
+    mostra();
+  }
+
+  // ---------- Missioni ----------
+  function confronta(v, pr) {
+    const a = norm(v).replace(",", ".");
+    const num = /^-?\d+(\.\d+)?$/;
+    return pr.r.some(r => {
+      const b = norm(r);
+      if (a === b) return true;
+      return !pr.esatto && num.test(a) && num.test(b) && Math.abs(parseFloat(a) - parseFloat(b)) < 1e-9;
+    });
+  }
+
+  function cardMissione(m) {
+    const fatta = !!S.missioni[m.id];
+    return `<article class="mission" data-m="${esc(m.id)}">
+      <span class="eyebrow">Missione in Dev-C++${fatta ? ' · <span class="done">completata ✓</span>' : ""}</span>
+      <h3>${esc(m.titolo)}</h3>
+      <p>${fmt(m.testo)}</p>
+      <h4>Che cosa deve avere il tuo programma</h4>
+      <ul class="req">${m.requisiti.map(r => `<li>${fmt(r)}</li>`).join("")}</ul>
+      ${m.aiuti.map((a, k) => `<details class="aiuto"><summary>Aiuto ${k + 1}</summary><p>${fmt(a)}</p></details>`).join("")}
+      <div class="console">
+        <div class="console-bar">C:\\Missioni\\${esc(m.id)}.exe</div>
+        <form class="prove" novalidate>
+          <p class="c-intro">${fatta ? "Missione completata. Ecco i risultati giusti." : "Esegui il tuo programma e scrivi qui che cosa stampa (solo il valore)."}</p>
+          ${m.prove.map((pr, k) => `<label for="${esc(m.id)}-p${k}">&gt; ${fmt(pr.d)}</label>
+            <div class="c-line"><input id="${esc(m.id)}-p${k}" class="c-inp" autocomplete="off" autocapitalize="off" spellcheck="false"${fatta ? ` value="${esc(pr.r[0])}" disabled` : ""}><span class="c-res" id="${esc(m.id)}-r${k}" aria-live="polite"></span></div>`).join("")}
+          ${fatta ? "" : '<button class="btn" type="submit">Verifica</button>'}
+        </form>
+      </div>
+    </article>`;
+  }
+
+  function collegaMissioni(pane) {
+    pane.querySelectorAll(".mission").forEach(el => {
+      const m = MISSIONI.find(x => x.id === el.dataset.m);
+      el.querySelector("form.prove").addEventListener("submit", e => {
+        e.preventDefault();
+        if (S.missioni[m.id]) return;
+        let tutte = true;
+        m.prove.forEach((pr, k) => {
+          const v = document.getElementById(m.id + "-p" + k).value;
+          const res = document.getElementById(m.id + "-r" + k);
+          const ok = v.trim() !== "" && confronta(v, pr);
+          tutte = tutte && ok;
+          res.textContent = v.trim() === "" ? "manca" : ok ? "✓ giusto" : "✗ non torna";
+          res.className = "c-res " + (ok ? "ok" : "bad");
+        });
+        if (tutte) {
+          S.missioni[m.id] = Date.now();
+          salva();
+          toast("Missione completata: +50 punti");
+          controllaBadge();
+          hud();
+          setTimeout(route, 1200);
+        }
+      });
+    });
+  }
+
+  // ---------- Glossario ----------
+  function vistaGlossario() {
+    const tutti = Object.values(TERM);
+    metti(view, `
+      <section class="intro"><h2>Glossario</h2><p>Tutti i ${tutti.length} termini della dispensa, in parole semplici. Cerca una parola che il professore ha usato in classe.</p></section>
+      <div class="filters">
+        <label for="cerca" class="sr">Cerca un termine</label>
+        <input id="cerca" class="inp" type="search" placeholder="Cerca: puntatore, return, ==…" autocomplete="off">
+        <div class="chips" role="group" aria-label="Filtra per livello">
+          <button class="chip" type="button" aria-pressed="true" data-l="0">Tutti</button>
+          ${L.map(lv => `<button class="chip" type="button" aria-pressed="false" data-l="${lv.id}">${lv.id}. ${esc(lv.titolo)}</button>`).join("")}
+        </div>
+      </div>
+      <div id="gl" class="cards"></div>`);
+    let liv = 0;
+    const q = $("#cerca"), gl = $("#gl");
+    function disegna() {
+      const s = q.value.trim().toLowerCase();
+      const items = tutti.filter(t => (!liv || t.liv === liv) && (!s || (t.t + " " + t.def + " " + (t.es || "")).toLowerCase().includes(s)));
+      metti(gl, items.length ? items.map(t => cardTermine(t, true)).join("")
+        : `<div class="empty"><p>Nessun termine trovato per «${esc(q.value)}». Prova con una parola più corta.</p></div>`);
+    }
+    q.addEventListener("input", disegna);
+    view.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
+      liv = +c.dataset.l;
+      view.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x === c)));
+      disegna();
+    }));
+    disegna();
+  }
+
+  // ---------- Da ripassare ----------
+  function vistaRipasso() {
+    const ids = S.ripasso.filter(id => TERM[id]);
+    metti(view, `<section class="intro"><h2>Da ripassare</h2><p>Qui finiscono i termini delle domande sbagliate. Rileggili e, quando ti sono chiari, segnali come ripassati.</p></section>` +
+      (ids.length ? `<div class="cards">${ids.map(id => cardTermine(TERM[id], true, true)).join("")}</div>`
+        : `<div class="empty"><p>Il mazzo è vuoto. Quando sbagli una domanda, il termine collegato compare qui.</p><a class="btn" href="#mappa">Vai alla mappa</a></div>`));
+    view.querySelectorAll("[data-ripassato]").forEach(b => b.addEventListener("click", () => {
+      S.ripasso = S.ripasso.filter(x => x !== b.dataset.ripassato);
+      S.ripassati = (S.ripassati || 0) + 1;
+      salva();
+      controllaBadge();
+      hud();
+      vistaRipasso();
+    }));
+  }
+
+  // ---------- Pagella ----------
+  function riepilogo() {
+    const x = punti(), g = grado(x), oggi = new Date().toLocaleDateString("it-IT");
+    const righe = [`Missione C++ – ${guardo ? guardo.nome : rete.nome} – riepilogo del ${oggi}`, `Grado: ${g.nome} (${x} punti)`, `Stelle: ${totStelle()}/${L.length * 3} · Missioni: ${missioniFatte()}/${MISSIONI.length}`, ""];
+    L.forEach(lv => {
+      const r = S.livelli[lv.id], ms = lv.missioni || [];
+      righe.push(`${lv.id}. ${lv.titolo}: sfida ${r ? r.best + "/" + lv.domande.length : "non fatta"}, ${"★".repeat(stelle(lv)) || "nessuna stella"}, missioni ${ms.filter(m => S.missioni[m.id]).length}/${ms.length}`);
+    });
+    const top = Object.entries(S.sbagli).filter(([id]) => TERM[id]).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    if (top.length) righe.push("", "Termini sbagliati più spesso: " + top.map(([id, n]) => `${TERM[id].t} (${n})`).join(", "));
+    const rip = S.ripasso.filter(id => TERM[id]);
+    if (rip.length) righe.push("Ancora da ripassare: " + rip.map(id => TERM[id].t).join(", "));
+    return righe.join("\n");
+  }
+
+  function vistaPagella() {
+    const x = punti(), g = grado(x);
+    const top = Object.entries(S.sbagli).filter(([id]) => TERM[id]).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    if (rete.tutor && !studenti) {
+      rete.studenti().then(s => { studenti = s; if (location.hash === "#pagella") vistaPagella(); },
+        () => toast("Non riesco a caricare l'elenco degli studenti"));
+    }
+    const quando = guardo && guardo.quando ? new Date(guardo.quando).toLocaleString("it-IT", { dateStyle: "short", timeStyle: "short" }) : "";
+    metti(view, `
+      <section class="intro"><h2>Pagella${guardo ? " di " + esc(guardo.nome) : ""}</h2><p>${guardo
+        ? (quando ? `Sola lettura. Ultimo salvataggio: ${esc(quando)}.` : "Non ha ancora iniziato a giocare.")
+        : "Il riepilogo dei tuoi progressi: mostralo a lezione, oppure copialo e mandalo."}</p></section>
+      ${rete.tutor && studenti ? `<div class="guardo"><label for="stud">Pagella di</label>
+        <select id="stud" class="inp"><option value="">te</option>${studenti.map(s =>
+          `<option value="${esc(s.utente)}"${guardo && guardo.id === s.utente ? " selected" : ""}>${esc(s.nome)}</option>`).join("")}</select></div>` : ""}
+      <div class="pag-grid">
+        <div class="panel"><span class="eyebrow">Grado</span><strong class="big">${esc(g.nome)}</strong><span class="muted">${x} punti${g.a ? ` · ${g.a - x} al grado «${esc(g.prossimo)}»` : ""}</span></div>
+        <div class="panel"><span class="eyebrow">Stelle</span><strong class="big">${totStelle()} / ${L.length * 3}</strong><span class="muted">Missioni completate: ${missioniFatte()} / ${MISSIONI.length}</span></div>
+      </div>
+      <div class="tabwrap"><table>
+        <thead><tr><th>Livello</th><th>Miglior sfida</th><th>Stelle</th><th>Missioni</th></tr></thead>
+        <tbody>${L.map(lv => {
+          const r = S.livelli[lv.id], ms = lv.missioni || [];
+          return `<tr><td><a href="#livello-${lv.id}">${lv.id}. ${esc(lv.titolo)}</a></td><td class="num">${r ? r.best + " / " + lv.domande.length : "—"}</td><td>${starsHtml(stelle(lv))}</td><td class="num">${ms.filter(m => S.missioni[m.id]).length} / ${ms.length}</td></tr>`;
+        }).join("")}</tbody>
+      </table></div>
+      <h3>Termini sbagliati più spesso</h3>
+      ${top.length ? `<ol class="top5">${top.map(([id, n]) => `<li><button type="button" class="link" data-t="${esc(id)}">${esc(TERM[id].t)}</button> <span class="muted">· ${n} ${n === 1 ? "errore" : "errori"} · livello ${TERM[id].liv}</span></li>`).join("")}</ol>`
+        : '<p class="muted">Ancora nessun errore registrato.</p>'}
+      <h3>Badge</h3>
+      <div class="badges">${BADGE.map(b => `<div class="badge${S.badge[b.id] ? " on" : ""}"><strong>${esc(b.nome)}</strong><span>${esc(b.desc)}</span></div>`).join("")}</div>
+      <div class="row">
+        <button class="btn" type="button" id="copia">Copia il riepilogo</button>
+        ${guardo ? "" : '<button class="btn ghost danger" type="button" id="azzera">Azzera i progressi</button>'}
+      </div>
+      <textarea id="riep" class="riep" readonly hidden aria-label="Riepilogo da copiare"></textarea>`);
+
+    const sel = $("#stud");
+    if (sel) sel.addEventListener("change", () => {
+      if (!sel.value) { if (guardo) { S = mio; guardo = null; } hud(); vistaPagella(); return; }
+      const st = studenti.find(s => s.utente === sel.value);
+      sel.disabled = true;
+      rete.statoDi(st.utente).then(r => {
+        if (!guardo) mio = S;
+        guardo = { id: st.utente, nome: st.nome, quando: r && r.aggiornato_il };
+        S = daSalvato(r && r.stato);
+        hud(); vistaPagella();
+      }, () => { toast("Non riesco a caricare i progressi: riprova"); sel.disabled = false; });
+    });
+
+    $("#copia").addEventListener("click", () => {
+      const testo = riepilogo();
+      const ta = $("#riep");
+      const mostraTesto = () => { ta.value = testo; ta.hidden = false; ta.focus(); ta.select(); toast("Seleziona il testo e copialo"); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(testo).then(() => toast("Riepilogo copiato: incollalo in un messaggio"), mostraTesto);
+      } else mostraTesto();
+    });
+    const az = $("#azzera");
+    let armato = false, t;
+    if (az) az.addEventListener("click", () => {
+      if (!armato) {
+        armato = true; az.textContent = "Sicuro? Tocca di nuovo per cancellare tutto";
+        t = setTimeout(() => { armato = false; az.textContent = "Azzera i progressi"; }, 4000);
+        return;
+      }
+      clearTimeout(t);
+      S = nuovoStato(); salva(); hud(); vistaPagella(); toast("Progressi azzerati");
+    });
+  }
+
+  // ---------- Finestra termine, navigazione, avvio ----------
+  const dlg = $("#dlg");
+  function apriTermine(id) {
+    if (!TERM[id]) return;
+    metti($("#dlg-body"), cardTermine(TERM[id], true));
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+  }
+  function chiudi() { if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); }
+  $("#dlg-close").addEventListener("click", chiudi);
+  dlg.addEventListener("click", e => { if (e.target === dlg) chiudi(); });
+  document.addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b) apriTermine(b.dataset.t); });
+
+  // Tasto «Copia» sui blocchi di codice; se gli appunti non sono disponibili, seleziona il codice.
+  document.addEventListener("click", e => {
+    const b = e.target.closest("button[data-copia]");
+    if (!b) return;
+    const pre = b.previousElementSibling;
+    const segna = msg => {
+      b.textContent = msg; b.classList.add("fatto");
+      setTimeout(() => { b.textContent = "Copia"; b.classList.remove("fatto"); }, 1600);
+    };
+    const seleziona = () => {
+      const r = document.createRange(); r.selectNodeContents(pre);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      segna("Premi Ctrl+C");
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(pre.textContent).then(() => segna("Copiato ✓"), seleziona);
+    else seleziona();
+  });
+
+  function navAttiva(sez) {
+    document.querySelectorAll(".tabs a").forEach(a => {
+      if (a.dataset.sez === sez) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+  }
+  function route() {
+    const h = location.hash.slice(1) || "mappa";
+    const m = h.match(/^livello-(\d+)(?:-(impara|sfida|missioni))?$/);
+    if (guardo && h !== "pagella") { S = mio; guardo = null; }
+    hud();
+    if (m) { navAttiva("mappa"); vistaLivello(+m[1], m[2] || "impara"); }
+    else if (h === "glossario") { navAttiva("glossario"); vistaGlossario(); }
+    else if (h === "ripasso") { navAttiva("ripasso"); vistaRipasso(); }
+    else if (h === "pagella") { navAttiva("pagella"); vistaPagella(); }
+    else { navAttiva("mappa"); vistaMappa(); }
+  }
+  window.addEventListener("hashchange", () => { route(); window.scrollTo(0, 0); });
+  $("#chi").textContent = rete.nome;
+  $("#esci").addEventListener("click", rete.esci);
+  route();
+}
+
+// ---------- Accesso e collegamento a Supabase ----------
+(function () {
+  "use strict";
+  const avvio = document.getElementById("avvio"), form = document.getElementById("accedi"), msg = document.getElementById("accedi-msg");
+  const SERVER_GIU = "Il server non risponde. Riprova tra qualche minuto; se continua, avvisa il tutor (il progetto potrebbe essere in pausa).";
+  const C = window.CONFIG || {};
+  if (!window.supabase || !C.url || !C.chiave || /XXXX|INCOLLA/.test(C.url + C.chiave)) {
+    avvio.textContent = window.supabase ? "La pagina non è ancora configurata: manca config.js con i dati del progetto Supabase."
+      : "Non riesco a caricare la libreria di Supabase: controlla la connessione e ricarica la pagina.";
+    return;
+  }
+  const sb = window.supabase.createClient(C.url, C.chiave);
+
+  sb.auth.getSession().then(({ data }) => {
+    if (data && data.session) entra(data.session.user); else chiediAccesso();
+  }, chiediAccesso);
+
+  function chiediAccesso() {
+    avvio.hidden = true;
+    form.hidden = false;
+    document.getElementById("email").focus();
+  }
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const bt = form.querySelector("button");
+    bt.disabled = true; msg.textContent = "";
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: document.getElementById("email").value.trim(),
+      password: document.getElementById("pw").value
+    });
+    bt.disabled = false;
+    if (error) {
+      msg.textContent = /invalid/i.test(error.message) ? "Email o password sbagliate." : SERVER_GIU;
+      return;
+    }
+    form.hidden = true;
+    entra(data.user);
+  });
+
+  async function entra(utente) {
+    avvio.hidden = false;
+    avvio.textContent = "Carico i livelli…";
+    const [lv, pr, pf] = await Promise.all([
+      sb.from("livelli").select("dati").order("id"),
+      sb.from("progressi").select("stato").eq("utente", utente.id).maybeSingle(),
+      sb.from("profili").select("nome, ruolo").eq("utente", utente.id).maybeSingle()
+    ]);
+    if (lv.error || pr.error || pf.error) { avvio.textContent = SERVER_GIU; return; }
+    if (!lv.data.length) { avvio.textContent = "Nel database non ci sono livelli: il tutor deve ancora caricare i contenuti."; return; }
+    document.getElementById("ingresso").hidden = true;
+    document.querySelector(".app").hidden = false;
+    gioco(lv.data.map(r => r.dati), pr.data && pr.data.stato, rete(utente, pf.data));
+  }
+
+  function rete(utente, profilo) {
+    const banner = document.getElementById("rete");
+    // Un salvataggio alla volta; se nel frattempo arrivano altre modifiche, si salva l'ultimo stato.
+    let ultimo = null, inCorso = false, ancora = false;
+    async function salva(S) {
+      ultimo = S; ancora = true;
+      if (inCorso) return;
+      inCorso = true;
+      while (ancora) {
+        ancora = false;
+        const { error } = await sb.from("progressi").upsert({ utente: utente.id, stato: ultimo, aggiornato_il: new Date().toISOString() });
+        banner.hidden = !error;
+        if (error) break;
+      }
+      inCorso = false;
+    }
+    document.getElementById("riprova-rete").addEventListener("click", () => salva(ultimo));
+    // Chiudendo la pagina con progressi non ancora salvati, il browser chiede conferma.
+    window.addEventListener("beforeunload", e => { if (inCorso || !banner.hidden) e.preventDefault(); });
+    const dati = r => { if (r.error) throw r.error; return r.data; };
+    return {
+      nome: (profilo && profilo.nome) || utente.email,
+      tutor: !!profilo && profilo.ruolo === "tutor",
+      salva,
+      studenti: () => sb.from("profili").select("utente, nome").neq("utente", utente.id).order("nome").then(dati),
+      statoDi: id => sb.from("progressi").select("stato, aggiornato_il").eq("utente", id).maybeSingle().then(dati),
+      esci: async () => {
+        try { await sb.auth.signOut({ scope: "local" }); } finally { location.hash = ""; location.reload(); }
+      }
+    };
+  }
+})();
+</script>
+</body>
+</html>
