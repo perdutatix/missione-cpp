@@ -210,8 +210,16 @@ tbody tr:last-child td { border-bottom: 0; }
 th { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .num { font-variant-numeric: tabular-nums; }
 .top5 { margin: 0; padding-left: 1.4em; display: grid; gap: 4px; }
-.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-.badge { border: 1px dashed var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; gap: 2px; color: var(--muted); }
+.giostra { display: grid; gap: 10px; }
+.giostra-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.giostra-top h3 { margin: 0; }
+.frecce { display: flex; gap: 6px; }
+.frecce .btn { min-width: 44px; font-size: 1.2rem; line-height: 1; }
+/* Una riga di badge che scorre di lato dentro il riquadro, mai la pagina. */
+.badges { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, calc((100% - 30px) / 4)); gap: 10px;
+  overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; overscroll-behavior-x: contain; scrollbar-width: none; }
+.badges::-webkit-scrollbar { display: none; }
+.badge { scroll-snap-align: start; border: 1px dashed var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; align-content: start; gap: 2px; color: var(--muted); }
 .badge strong { font-family: var(--f-display); }
 .badge.on { border: 1px solid var(--star); background: var(--surface); color: var(--ink); }
 .badge.on strong::before { content: "★ "; color: var(--star); }
@@ -264,7 +272,7 @@ dialog::backdrop { background: var(--scrim); }
   .hud-xp { min-width: 0; grid-column: 1 / -1; grid-row: 2; }
 }
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; }
+  * { transition: none !important; scroll-behavior: auto !important; }
 }
 </style>
 </head>
@@ -759,24 +767,33 @@ function gioco(L, salvato, rete) {
   // ---------- Punteggio (lo studente vede solo il suo) e Studenti (solo il tutor) ----------
   const topErrori = (st, k = 5) => Object.entries(st.sbagli).filter(([id, n]) => TERM[id] && n > 0).sort((a, b) => b[1] - a[1]).slice(0, k);
 
-  function riepilogo(st = S, nome = rete.nome) {
+  // Gli errori più frequenti li vede solo il tutor (conErrori), per preparare le lezioni.
+  function riepilogo(st = S, nome = rete.nome, conErrori = false) {
     const x = punti(st), g = grado(x), oggi = new Date().toLocaleDateString("it-IT");
     const righe = [`Missione C++ – ${nome} – riepilogo del ${oggi}`, `Grado: ${g.nome} (${x} punti)`, `Stelle: ${totStelle(st)}/${L.length * 3} · Missioni: ${missioniFatte(st)}/${MISSIONI.length}`, ""];
     L.forEach(lv => {
       const r = st.livelli[lv.id], ms = lv.missioni || [], t = st.tentativi[lv.id];
       righe.push(`${lv.id}. ${lv.titolo}: sfida ${r ? r.best + "/" + lv.domande.length : "non fatta"}${t ? ` (${t} ${t === 1 ? "tentativo" : "tentativi"})` : ""}, ${"★".repeat(stelle(lv, st)) || "nessuna stella"}, missioni ${ms.filter(m => st.missioni[m.id]).length}/${ms.length}`);
     });
-    const top = topErrori(st);
+    const top = conErrori ? topErrori(st) : [];
     if (top.length) righe.push("", "Termini sbagliati più spesso: " + top.map(([id, n]) => `${TERM[id].t} (${n})`).join(", "));
     const rip = st.ripasso.filter(id => TERM[id]);
     if (rip.length) righe.push("Ancora da ripassare: " + rip.map(id => TERM[id].t).join(", "));
     return righe.join("\n");
   }
 
-  // Grado, stelle, tabella dei livelli, errori e badge: uguali per lo studente e per il tutor.
-  function risultatiHtml(st) {
+  // Badge in alto (prima quelli presi), grado, stelle e livelli; gli errori solo nella vista del tutor.
+  function risultatiHtml(st, conErrori = false) {
     const x = punti(st), g = grado(x), top = topErrori(st);
+    const bs = BADGE.slice().sort((a, b) => !st.badge[a.id] - !st.badge[b.id]), presi = bs.filter(b => st.badge[b.id]).length;
     return `
+      <section class="giostra" aria-label="Badge">
+        <div class="giostra-top">
+          <h3>Badge <span class="muted">${presi} / ${BADGE.length}</span></h3>
+          <span class="frecce"><button class="btn ghost" type="button" data-scorri="-1" aria-label="Badge precedenti" disabled>‹</button><button class="btn ghost" type="button" data-scorri="1" aria-label="Badge successivi">›</button></span>
+        </div>
+        <div class="badges" tabindex="0">${bs.map(b => `<div class="badge${st.badge[b.id] ? " on" : ""}"><strong>${esc(b.nome)}</strong><span>${esc(b.desc)}</span></div>`).join("")}</div>
+      </section>
       <div class="pag-grid">
         <div class="panel"><span class="eyebrow">Grado</span><strong class="big">${esc(g.nome)}</strong><span class="muted">${x} punti${g.a ? ` · ${g.a - x} al grado «${esc(g.prossimo)}»` : ""}</span></div>
         <div class="panel"><span class="eyebrow">Stelle</span><strong class="big">${totStelle(st)} / ${L.length * 3}</strong><span class="muted">Missioni completate: ${missioniFatte(st)} / ${MISSIONI.length}</span></div>
@@ -788,11 +805,9 @@ function gioco(L, salvato, rete) {
           return `<tr><td><a href="#livello-${lv.id}">${lv.id}. ${esc(lv.titolo)}</a></td><td class="num">${r ? r.best + " / " + lv.domande.length : "—"}</td><td>${starsHtml(stelle(lv, st))}</td><td class="num">${ms.filter(m => st.missioni[m.id]).length} / ${ms.length}</td><td class="num">${st.tentativi[lv.id] || "—"}</td></tr>`;
         }).join("")}</tbody>
       </table></div>
-      <h3>Termini sbagliati più spesso</h3>
+      ${conErrori ? `<h3>Termini sbagliati più spesso</h3>
       ${top.length ? `<ol class="top5">${top.map(([id, n]) => `<li><button type="button" class="link" data-t="${esc(id)}">${esc(TERM[id].t)}</button> <span class="muted">· ${n} ${n === 1 ? "errore" : "errori"} · livello ${TERM[id].liv}</span></li>`).join("")}</ol>`
-        : '<p class="muted">Ancora nessun errore registrato.</p>'}
-      <h3>Badge</h3>
-      <div class="badges">${BADGE.map(b => `<div class="badge${st.badge[b.id] ? " on" : ""}"><strong>${esc(b.nome)}</strong><span>${esc(b.desc)}</span></div>`).join("")}</div>`;
+        : '<p class="muted">Ancora nessun errore registrato.</p>'}` : ""}`;
   }
 
   // Tasto «Copia il riepilogo»: negli appunti, oppure testo da selezionare a mano.
@@ -874,7 +889,7 @@ function gioco(L, salvato, rete) {
       metti(view, `
         <a class="back" href="#studenti">← Studenti</a>
         <section class="intro"><h2>${esc(s.nome)}</h2><p>Ultima attività: ${esc(quando(s.quando))}. Sta facendo il livello ${lv.id}, ${esc(lv.titolo)}.</p></section>
-        ${risultatiHtml(st)}
+        ${risultatiHtml(st, true)}
         <h3>Da ripassare (${rip.length})</h3>
         ${rip.length ? `<div class="chips">${rip.map(t => `<button type="button" class="chip" data-t="${esc(t)}">${esc(TERM[t].t)}</button>`).join("")}</div>` : '<p class="muted">Il mazzo è vuoto.</p>'}
         <h3>Diario</h3>
@@ -882,7 +897,7 @@ function gioco(L, salvato, rete) {
           : '<p class="muted">Ancora niente: il diario si riempie mentre gioca.</p>'}
         <div class="row"><button class="btn" type="button" id="copia">Copia il riepilogo</button></div>
         <textarea id="riep" class="riep" readonly hidden aria-label="Riepilogo da copiare"></textarea>`);
-      collegaCopia(() => riepilogo(st, s.nome));
+      collegaCopia(() => riepilogo(st, s.nome, true));
     });
   }
 
@@ -897,6 +912,18 @@ function gioco(L, salvato, rete) {
   $("#dlg-close").addEventListener("click", chiudi);
   dlg.addEventListener("click", e => { if (e.target === dlg) chiudi(); });
   document.addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b) apriTermine(b.dataset.t); });
+  // Frecce dei badge: scorrono di una schermata; si spengono agli estremi.
+  document.addEventListener("click", e => {
+    const b = e.target.closest("button[data-scorri]"); if (!b) return;
+    const r = b.closest(".giostra").querySelector(".badges");
+    r.scrollBy(r.clientWidth * b.dataset.scorri, 0);
+  });
+  document.addEventListener("scroll", e => {
+    const r = e.target, g = r.closest && r.closest(".giostra"); if (!g) return;
+    const [ind, av] = g.querySelectorAll("button[data-scorri]");
+    ind.disabled = r.scrollLeft <= 1;
+    av.disabled = r.scrollLeft + r.clientWidth >= r.scrollWidth - 1;
+  }, true);
 
   // Tasto «Copia» sui blocchi di codice; se gli appunti non sono disponibili, seleziona il codice.
   document.addEventListener("click", e => {
