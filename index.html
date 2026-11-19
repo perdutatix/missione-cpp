@@ -60,7 +60,7 @@ h3 { font-size: 1.12rem; }
 h4 { font-size: .95rem; }
 p { margin: 0; }
 a { color: var(--accent); }
-code { font-family: var(--f-code); font-size: .9em; background: var(--code-bg); padding: .05em .35em; border-radius: 4px; }
+code { font-family: var(--f-code); font-size: .9em; background: var(--code-bg); padding: .05em .35em; border-radius: 4px; overflow-wrap: anywhere; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .eyebrow { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
 .muted { color: var(--muted); }
@@ -100,7 +100,7 @@ code { font-family: var(--f-code); font-size: .9em; background: var(--code-bg); 
 .btn[disabled] { opacity: .5; cursor: default; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; }
 .link { font: inherit; background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; }
-.code { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--f-code); font-size: .86rem; line-height: 1.5; }
+.code { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 0; white-space: break-spaces; overflow-wrap: anywhere; font-family: var(--f-code); font-size: .86rem; line-height: 1.5; }
 .code code { background: none; padding: 0; font-size: inherit; }
 .codebox { position: relative; }
 .codebox .code { padding-right: 76px; }
@@ -199,8 +199,8 @@ code { font-family: var(--f-code); font-size: .9em; background: var(--code-bg); 
 .chip { font: inherit; font-size: .85rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; cursor: pointer; }
 .chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 
-/* Pagella */
-.pag-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+/* Punteggio */
+.pag-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 4px; }
 .big { font-family: var(--f-display); font-size: 1.5rem; font-variant-numeric: tabular-nums; }
 .tabwrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
@@ -210,7 +210,7 @@ tbody tr:last-child td { border-bottom: 0; }
 th { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .num { font-variant-numeric: tabular-nums; }
 .top5 { margin: 0; padding-left: 1.4em; display: grid; gap: 4px; }
-.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .badge { border: 1px dashed var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; gap: 2px; color: var(--muted); }
 .badge strong { font-family: var(--f-display); }
 .badge.on { border: 1px solid var(--star); background: var(--surface); color: var(--ink); }
@@ -236,11 +236,32 @@ dialog::backdrop { background: var(--scrim); }
 .ingresso form .btn { margin-top: 8px; }
 .ingresso label { font-weight: 600; font-size: .9rem; }
 .chi { margin-left: auto; display: inline-flex; gap: 10px; align-items: center; font-size: .9rem; color: var(--muted); }
-.guardo { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.guardo select { width: auto; }
+
+/* Studenti (tutor) */
+.classe { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.stud-top { display: flex; gap: 10px; align-items: baseline; }
+.stud .pos { font-family: var(--f-display); font-weight: 700; font-size: 1.3rem; color: var(--accent); }
+.stud-n { font-family: var(--f-display); font-weight: 600; font-size: 1.15rem; }
+.stud-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .88rem; color: var(--muted); margin-top: 4px; }
+.diario { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.diario li { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.diario li:last-child { border-bottom: 0; }
+.diario time { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
+.liv-tab td:first-child { white-space: normal; }
+@media (max-width: 480px) {
+  .diario li { grid-template-columns: 1fr; gap: 0; }
+  .liv-tab th, .liv-tab td { padding: 8px 5px; font-size: .84rem; }
+  .liv-tab th { letter-spacing: 0; font-size: .66rem; }
+  .liv-tab .stars { letter-spacing: 0; }
+}
+@media (max-width: 380px) {
+  .liv-tab th[data-corto] { font-size: 0; }
+  .liv-tab th[data-corto]::after { content: attr(data-corto); font-size: .66rem; }
+}
 @media (max-width: 480px) {
   .mrow { grid-template-columns: 1fr; gap: 4px; }
-  .hud-xp { min-width: 0; flex: 1 1 100%; }
+  .hud { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .hud-xp { min-width: 0; grid-column: 1 / -1; grid-row: 2; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
@@ -285,7 +306,8 @@ dialog::backdrop { background: var(--scrim); }
     <a href="#mappa" data-sez="mappa">Mappa</a>
     <a href="#glossario" data-sez="glossario">Glossario</a>
     <a href="#ripasso" data-sez="ripasso">Da ripassare <span class="count" id="nRip"></span></a>
-    <a href="#pagella" data-sez="pagella">Pagella</a>
+    <a href="#punteggio" data-sez="punteggio">Punteggio</a>
+    <a href="#studenti" data-sez="studenti" id="tab-studenti" hidden>Studenti</a>
     <span class="chi"><span id="chi"></span><button class="link" type="button" id="esci">Esci</button></span>
   </nav>
   <div class="box bad" id="rete" role="alert" hidden>
@@ -307,7 +329,7 @@ dialog::backdrop { background: var(--scrim); }
 <script src="config.js"></script>
 <script>
 // Il gioco. Parte solo dopo l'accesso, con i livelli e lo stato scaricati da Supabase (vedi in fondo).
-// rete = { nome, tutor, salva(S), studenti(), statoDi(id), esci() }
+// rete = { nome, tutor, salva(S), classe(), esci() }
 function gioco(L, salvato, rete) {
   "use strict";
   // Tutto il testo che finisce nella pagina passa da esc() o fmt(): i contenuti sono nostri e
@@ -329,7 +351,9 @@ function gioco(L, salvato, rete) {
   const GRADI = [[0, "Matricola"], [150, "Apprendista"], [400, "Programmatore junior"], [700, "Programmatore"], [1000, "Esperto di C++"], [1300, "Maestro del C++"]];
 
   // ---------- Progressi (online, nella tabella progressi) ----------
-  const nuovoStato = () => ({ v: 1, livelli: {}, missioni: {}, sbagli: {}, ripasso: [], ripassati: 0, badge: {}, primaGiusta: false });
+  // diario: gli ultimi 200 eventi ({q: quando, e: tipo, …}), letti dal tutor nella scheda Studenti.
+  const nuovoStato = () => ({ v: 1, livelli: {}, missioni: {}, sbagli: {}, ripasso: [], ripassati: 0, badge: {}, primaGiusta: false, tentativi: {}, diario: [] });
+  const EVENTI = ["entra", "legge", "sfida", "missione", "ripasso", "badge"];
   // Lo stato arriva dal database e il tutor vede anche quello degli studenti: lo ricostruisco campo per campo,
   // con solo numeri e testi, così nessun valore salvato a mano può finire nella pagina come markup.
   function daSalvato(s) {
@@ -344,13 +368,22 @@ function gioco(L, salvato, rete) {
     n.ripasso = Array.isArray(s.ripasso) ? s.ripasso.map(String) : [];
     n.ripassati = num(s.ripassati);
     n.primaGiusta = !!s.primaGiusta;
+    voci(s.tentativi).forEach(([k, v]) => { n.tentativi[k] = num(v); });
+    n.diario = (Array.isArray(s.diario) ? s.diario : []).filter(d => d && EVENTI.includes(d.e)).slice(-200)
+      .map(d => ({ q: num(d.q), e: d.e, liv: num(d.liv), g: num(d.g), n: num(d.n), rec: !!d.rec, id: String(d.id || "") }));
     return n;
   }
   let S = daSalvato(salvato);
-  // Il tutor può guardare la pagella di uno studente: S diventa per un momento lo stato dello studente
-  // (sola lettura, non si salva) e torna il proprio appena si esce dalla Pagella.
-  let mio = null, guardo = null, studenti = null;
-  function salva() { if (!guardo) rete.salva(S); }
+  function salva() { rete.salva(S); }
+  // Aggiunge un evento al diario. Con «minuti» non lo ripete se è appena successo
+  // (stessa apertura del gioco, stesso livello letto): restituisce true se l'ha aggiunto.
+  function annota(ev, minuti) {
+    const ora = Date.now(), ult = S.diario[S.diario.length - 1];
+    if (minuti && ult && ora - ult.q < minuti * 60000 && (ev.e === "entra" || (ult.e === ev.e && ult.liv === ev.liv))) return false;
+    S.diario.push(Object.assign({ q: ora }, ev));
+    if (S.diario.length > 200) S.diario.splice(0, S.diario.length - 200);
+    return true;
+  }
 
   // ---------- Utilità ----------
   const $ = (s, r) => (r || document).querySelector(s);
@@ -366,13 +399,24 @@ function gioco(L, salvato, rete) {
   }
   const norm = s => String(s).trim().toLowerCase().replace(/\s+/g, "");
   const stelleDa = p => (p >= 1 ? 3 : p >= 0.8 ? 2 : p >= 0.5 ? 1 : 0);
-  function stelle(lv) { const r = S.livelli[lv.id]; return r ? stelleDa(r.best / lv.domande.length) : 0; }
-  const totStelle = () => L.reduce((t, lv) => t + stelle(lv), 0);
-  const missioniFatte = () => MISSIONI.filter(m => S.missioni[m.id]).length;
-  function punti() {
+  // I calcoli lavorano sullo stato di chi gioca (S) o, per il tutor, su quello di uno studente (st).
+  function stelle(lv, st = S) { const r = st.livelli[lv.id]; return r ? stelleDa(r.best / lv.domande.length) : 0; }
+  const totStelle = (st = S) => L.reduce((t, lv) => t + stelle(lv, st), 0);
+  const missioniFatte = (st = S) => MISSIONI.filter(m => st.missioni[m.id]).length;
+  function punti(st = S) {
     let x = 0;
-    L.forEach(lv => { const r = S.livelli[lv.id]; if (r) x += r.best * 10; });
-    return x + missioniFatte() * 50;
+    L.forEach(lv => { const r = st.livelli[lv.id]; if (r) x += r.best * 10; });
+    return x + missioniFatte(st) * 50;
+  }
+  const livelloAttuale = (st = S) => L.find(lv => stelle(lv, st) < 2) || L[L.length - 1];
+  function quando(ts, conGiorni = true) {
+    if (!ts) return "mai";
+    const d = new Date(ts), ieri = new Date(Date.now() - 864e5);
+    const ora = d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+    if (d.toDateString() === new Date().toDateString()) return "oggi " + ora;
+    if (d.toDateString() === ieri.toDateString()) return "ieri " + ora;
+    const giorni = Math.floor((Date.now() - d) / 864e5);
+    return d.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "numeric" }) + " " + ora + (conGiorni ? ` (${giorni} giorni fa)` : "");
   }
   function grado(x) {
     let i = 0;
@@ -393,7 +437,7 @@ function gioco(L, salvato, rete) {
 
   function controllaBadge() {
     const nuovi = [];
-    const dai = id => { if (!S.badge[id]) { S.badge[id] = Date.now(); nuovi.push(BADGE.find(b => b.id === id)); } };
+    const dai = id => { if (!S.badge[id]) { S.badge[id] = Date.now(); annota({ e: "badge", id }); nuovi.push(BADGE.find(b => b.id === id)); } };
     if (S.primaGiusta) dai("primo");
     L.forEach(lv => { if (stelle(lv) === 3) dai("liv" + lv.id); });
     const nm = missioniFatte();
@@ -475,6 +519,7 @@ function gioco(L, salvato, rete) {
       <section id="pane"></section>`);
     const pane = $("#pane");
     if (tab === "impara") {
+      if (annota({ e: "legge", liv: id }, 30)) salva();
       metti(pane, `<div class="cards">${lv.termini.map(t => cardTermine(t)).join("")}</div>
         <div class="row" style="margin-top:16px"><a class="btn" href="#livello-${id}-sfida">Ho letto: vai alla sfida →</a></div>`);
     } else if (tab === "sfida") {
@@ -575,6 +620,8 @@ function gioco(L, salvato, rete) {
       const prima = S.livelli[lv.id] ? S.livelli[lv.id].best : 0;
       const record = giuste > prima;
       if (record) S.livelli[lv.id] = { best: giuste, data: Date.now() };
+      S.tentativi[lv.id] = (S.tentativi[lv.id] || 0) + 1;
+      annota({ e: "sfida", liv: lv.id, g: giuste, n: qs.length, rec: record });
       salva();
       const nuovi = controllaBadge();
       hud();
@@ -650,6 +697,7 @@ function gioco(L, salvato, rete) {
         });
         if (tutte) {
           S.missioni[m.id] = Date.now();
+          annota({ e: "missione", liv: m.liv, id: m.id });
           salva();
           toast("Missione completata: +50 punti");
           controllaBadge();
@@ -700,6 +748,7 @@ function gioco(L, salvato, rete) {
     view.querySelectorAll("[data-ripassato]").forEach(b => b.addEventListener("click", () => {
       S.ripasso = S.ripasso.filter(x => x !== b.dataset.ripassato);
       S.ripassati = (S.ripassati || 0) + 1;
+      annota({ e: "ripasso", id: b.dataset.ripassato });
       salva();
       controllaBadge();
       hud();
@@ -707,89 +756,133 @@ function gioco(L, salvato, rete) {
     }));
   }
 
-  // ---------- Pagella ----------
-  function riepilogo() {
-    const x = punti(), g = grado(x), oggi = new Date().toLocaleDateString("it-IT");
-    const righe = [`Missione C++ – ${guardo ? guardo.nome : rete.nome} – riepilogo del ${oggi}`, `Grado: ${g.nome} (${x} punti)`, `Stelle: ${totStelle()}/${L.length * 3} · Missioni: ${missioniFatte()}/${MISSIONI.length}`, ""];
+  // ---------- Punteggio (lo studente vede solo il suo) e Studenti (solo il tutor) ----------
+  const topErrori = (st, k = 5) => Object.entries(st.sbagli).filter(([id, n]) => TERM[id] && n > 0).sort((a, b) => b[1] - a[1]).slice(0, k);
+
+  function riepilogo(st = S, nome = rete.nome) {
+    const x = punti(st), g = grado(x), oggi = new Date().toLocaleDateString("it-IT");
+    const righe = [`Missione C++ – ${nome} – riepilogo del ${oggi}`, `Grado: ${g.nome} (${x} punti)`, `Stelle: ${totStelle(st)}/${L.length * 3} · Missioni: ${missioniFatte(st)}/${MISSIONI.length}`, ""];
     L.forEach(lv => {
-      const r = S.livelli[lv.id], ms = lv.missioni || [];
-      righe.push(`${lv.id}. ${lv.titolo}: sfida ${r ? r.best + "/" + lv.domande.length : "non fatta"}, ${"★".repeat(stelle(lv)) || "nessuna stella"}, missioni ${ms.filter(m => S.missioni[m.id]).length}/${ms.length}`);
+      const r = st.livelli[lv.id], ms = lv.missioni || [], t = st.tentativi[lv.id];
+      righe.push(`${lv.id}. ${lv.titolo}: sfida ${r ? r.best + "/" + lv.domande.length : "non fatta"}${t ? ` (${t} ${t === 1 ? "tentativo" : "tentativi"})` : ""}, ${"★".repeat(stelle(lv, st)) || "nessuna stella"}, missioni ${ms.filter(m => st.missioni[m.id]).length}/${ms.length}`);
     });
-    const top = Object.entries(S.sbagli).filter(([id]) => TERM[id]).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const top = topErrori(st);
     if (top.length) righe.push("", "Termini sbagliati più spesso: " + top.map(([id, n]) => `${TERM[id].t} (${n})`).join(", "));
-    const rip = S.ripasso.filter(id => TERM[id]);
+    const rip = st.ripasso.filter(id => TERM[id]);
     if (rip.length) righe.push("Ancora da ripassare: " + rip.map(id => TERM[id].t).join(", "));
     return righe.join("\n");
   }
 
-  function vistaPagella() {
-    const x = punti(), g = grado(x);
-    const top = Object.entries(S.sbagli).filter(([id]) => TERM[id]).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    if (rete.tutor && !studenti) {
-      rete.studenti().then(s => { studenti = s; if (location.hash === "#pagella") vistaPagella(); },
-        () => toast("Non riesco a caricare l'elenco degli studenti"));
-    }
-    const quando = guardo && guardo.quando ? new Date(guardo.quando).toLocaleString("it-IT", { dateStyle: "short", timeStyle: "short" }) : "";
-    metti(view, `
-      <section class="intro"><h2>Pagella${guardo ? " di " + esc(guardo.nome) : ""}</h2><p>${guardo
-        ? (quando ? `Sola lettura. Ultimo salvataggio: ${esc(quando)}.` : "Non ha ancora iniziato a giocare.")
-        : "Il riepilogo dei tuoi progressi: mostralo a lezione, oppure copialo e mandalo."}</p></section>
-      ${rete.tutor && studenti ? `<div class="guardo"><label for="stud">Pagella di</label>
-        <select id="stud" class="inp"><option value="">te</option>${studenti.map(s =>
-          `<option value="${esc(s.utente)}"${guardo && guardo.id === s.utente ? " selected" : ""}>${esc(s.nome)}</option>`).join("")}</select></div>` : ""}
+  // Grado, stelle, tabella dei livelli, errori e badge: uguali per lo studente e per il tutor.
+  function risultatiHtml(st) {
+    const x = punti(st), g = grado(x), top = topErrori(st);
+    return `
       <div class="pag-grid">
         <div class="panel"><span class="eyebrow">Grado</span><strong class="big">${esc(g.nome)}</strong><span class="muted">${x} punti${g.a ? ` · ${g.a - x} al grado «${esc(g.prossimo)}»` : ""}</span></div>
-        <div class="panel"><span class="eyebrow">Stelle</span><strong class="big">${totStelle()} / ${L.length * 3}</strong><span class="muted">Missioni completate: ${missioniFatte()} / ${MISSIONI.length}</span></div>
+        <div class="panel"><span class="eyebrow">Stelle</span><strong class="big">${totStelle(st)} / ${L.length * 3}</strong><span class="muted">Missioni completate: ${missioniFatte(st)} / ${MISSIONI.length}</span></div>
       </div>
-      <div class="tabwrap"><table>
-        <thead><tr><th>Livello</th><th>Miglior sfida</th><th>Stelle</th><th>Missioni</th></tr></thead>
+      <div class="tabwrap"><table class="liv-tab">
+        <thead><tr><th>Livello</th><th>Sfida</th><th>Stelle</th><th data-corto="Miss.">Missioni</th><th data-corto="Tent.">Tentativi</th></tr></thead>
         <tbody>${L.map(lv => {
-          const r = S.livelli[lv.id], ms = lv.missioni || [];
-          return `<tr><td><a href="#livello-${lv.id}">${lv.id}. ${esc(lv.titolo)}</a></td><td class="num">${r ? r.best + " / " + lv.domande.length : "—"}</td><td>${starsHtml(stelle(lv))}</td><td class="num">${ms.filter(m => S.missioni[m.id]).length} / ${ms.length}</td></tr>`;
+          const r = st.livelli[lv.id], ms = lv.missioni || [];
+          return `<tr><td><a href="#livello-${lv.id}">${lv.id}. ${esc(lv.titolo)}</a></td><td class="num">${r ? r.best + " / " + lv.domande.length : "—"}</td><td>${starsHtml(stelle(lv, st))}</td><td class="num">${ms.filter(m => st.missioni[m.id]).length} / ${ms.length}</td><td class="num">${st.tentativi[lv.id] || "—"}</td></tr>`;
         }).join("")}</tbody>
       </table></div>
       <h3>Termini sbagliati più spesso</h3>
       ${top.length ? `<ol class="top5">${top.map(([id, n]) => `<li><button type="button" class="link" data-t="${esc(id)}">${esc(TERM[id].t)}</button> <span class="muted">· ${n} ${n === 1 ? "errore" : "errori"} · livello ${TERM[id].liv}</span></li>`).join("")}</ol>`
         : '<p class="muted">Ancora nessun errore registrato.</p>'}
       <h3>Badge</h3>
-      <div class="badges">${BADGE.map(b => `<div class="badge${S.badge[b.id] ? " on" : ""}"><strong>${esc(b.nome)}</strong><span>${esc(b.desc)}</span></div>`).join("")}</div>
+      <div class="badges">${BADGE.map(b => `<div class="badge${st.badge[b.id] ? " on" : ""}"><strong>${esc(b.nome)}</strong><span>${esc(b.desc)}</span></div>`).join("")}</div>`;
+  }
+
+  // Tasto «Copia il riepilogo»: negli appunti, oppure testo da selezionare a mano.
+  function collegaCopia(testo) {
+    $("#copia").addEventListener("click", () => {
+      const t = testo(), ta = $("#riep");
+      const mostraTesto = () => { ta.value = t; ta.hidden = false; ta.focus(); ta.select(); toast("Seleziona il testo e copialo"); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(() => toast("Riepilogo copiato: incollalo in un messaggio"), mostraTesto);
+      else mostraTesto();
+    });
+  }
+
+  function vistaPunteggio() {
+    metti(view, `
+      <section class="intro"><h2>Punteggio</h2><p>I tuoi risultati: mostrali a lezione, oppure copia il riepilogo e mandalo.</p></section>
+      ${risultatiHtml(S)}
       <div class="row">
         <button class="btn" type="button" id="copia">Copia il riepilogo</button>
-        ${guardo ? "" : '<button class="btn ghost danger" type="button" id="azzera">Azzera i progressi</button>'}
+        <button class="btn ghost danger" type="button" id="azzera">Azzera i progressi</button>
       </div>
       <textarea id="riep" class="riep" readonly hidden aria-label="Riepilogo da copiare"></textarea>`);
-
-    const sel = $("#stud");
-    if (sel) sel.addEventListener("change", () => {
-      if (!sel.value) { if (guardo) { S = mio; guardo = null; } hud(); vistaPagella(); return; }
-      const st = studenti.find(s => s.utente === sel.value);
-      sel.disabled = true;
-      rete.statoDi(st.utente).then(r => {
-        if (!guardo) mio = S;
-        guardo = { id: st.utente, nome: st.nome, quando: r && r.aggiornato_il };
-        S = daSalvato(r && r.stato);
-        hud(); vistaPagella();
-      }, () => { toast("Non riesco a caricare i progressi: riprova"); sel.disabled = false; });
-    });
-
-    $("#copia").addEventListener("click", () => {
-      const testo = riepilogo();
-      const ta = $("#riep");
-      const mostraTesto = () => { ta.value = testo; ta.hidden = false; ta.focus(); ta.select(); toast("Seleziona il testo e copialo"); };
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(testo).then(() => toast("Riepilogo copiato: incollalo in un messaggio"), mostraTesto);
-      } else mostraTesto();
-    });
+    collegaCopia(() => riepilogo());
     const az = $("#azzera");
     let armato = false, t;
-    if (az) az.addEventListener("click", () => {
+    az.addEventListener("click", () => {
       if (!armato) {
         armato = true; az.textContent = "Sicuro? Tocca di nuovo per cancellare tutto";
         t = setTimeout(() => { armato = false; az.textContent = "Azzera i progressi"; }, 4000);
         return;
       }
       clearTimeout(t);
-      S = nuovoStato(); salva(); hud(); vistaPagella(); toast("Progressi azzerati");
+      S = nuovoStato(); salva(); hud(); vistaPunteggio(); toast("Progressi azzerati");
+    });
+  }
+
+  function testoEvento(d) {
+    const lv = L.find(x => x.id === d.liv), nl = lv ? `livello ${lv.id} (${esc(lv.titolo)})` : "livello";
+    if (d.e === "entra") return "Ha aperto il gioco";
+    if (d.e === "legge") return "Ha letto i termini del " + nl;
+    if (d.e === "sfida") return `Sfida del ${nl}: <strong>${d.g} su ${d.n}</strong>${d.rec ? ' · <span class="rec">nuovo record</span>' : ""}`;
+    if (d.e === "missione") { const m = MISSIONI.find(x => x.id === d.id); return "Missione completata: <strong>" + esc(m ? m.titolo : d.id) + "</strong>"; }
+    if (d.e === "ripasso") return "Ha ripassato: " + (TERM[d.id] ? `<button type="button" class="link" data-t="${esc(d.id)}">${esc(TERM[d.id].t)}</button>` : esc(d.id));
+    const b = BADGE.find(x => x.id === d.id);
+    return "Badge sbloccato: <strong>" + esc(b ? b.nome : d.id) + "</strong>";
+  }
+
+  // Scarica sempre dati freschi; mostra la vista solo se nel frattempo non si è cambiata pagina.
+  function conClasse(hash, disegna) {
+    metti(view, `<p class="muted" id="carico">Carico gli studenti…</p>`);
+    rete.classe().then(cl => {
+      if (location.hash !== hash) return;
+      disegna(cl.map(s => Object.assign({ st: daSalvato(s.stato) }, s)));
+    }, () => { const c = $("#carico"); if (c) c.textContent = "Non riesco a caricare gli studenti: controlla la connessione e riprova."; });
+  }
+
+  function vistaStudenti() {
+    conClasse("#studenti", cl => {
+      cl.forEach(s => { s.x = punti(s.st); });
+      cl.sort((a, b) => b.x - a.x);
+      metti(view, `
+        <section class="intro"><h2>Studenti</h2><p>Come stanno andando, in ordine di punti. Tocca un nome per i dettagli e il diario di cosa ha fatto.</p></section>
+        ${cl.length ? `<ol class="classe">${cl.map((s, k) => {
+          const lv = livelloAttuale(s.st), rip = s.st.ripasso.filter(id => TERM[id]).length;
+          return `<li><a class="lvl stud" href="#studente-${esc(s.utente)}">
+            <span class="stud-top"><span class="pos">${k + 1}°</span><span class="stud-n">${esc(s.nome)}</span></span>
+            <span class="muted">Ultima attività: ${esc(quando(s.quando))}</span>
+            <span class="stud-meta"><span>${esc(grado(s.x).nome)} · ${s.x} punti</span><span>★ ${totStelle(s.st)} / ${L.length * 3}</span><span>Missioni ${missioniFatte(s.st)} / ${MISSIONI.length}</span><span>Sta facendo il livello ${lv.id}</span><span>Da ripassare: ${rip}</span></span>
+          </a></li>`;
+        }).join("")}</ol>`
+          : '<div class="empty"><p>Nessuno studente ancora. Si aggiungono con <code>node supabase/remoto.js account EMAIL Nome</code>.</p></div>'}`);
+    });
+  }
+
+  function vistaStudente(id) {
+    conClasse("#studente-" + id, cl => {
+      const s = cl.find(x => x.utente === id);
+      if (!s) { metti(view, '<a class="back" href="#studenti">← Studenti</a><div class="empty"><p>Studente non trovato.</p></div>'); return; }
+      const st = s.st, lv = livelloAttuale(st), rip = st.ripasso.filter(t => TERM[t]), diario = st.diario.slice().reverse();
+      metti(view, `
+        <a class="back" href="#studenti">← Studenti</a>
+        <section class="intro"><h2>${esc(s.nome)}</h2><p>Ultima attività: ${esc(quando(s.quando))}. Sta facendo il livello ${lv.id}, ${esc(lv.titolo)}.</p></section>
+        ${risultatiHtml(st)}
+        <h3>Da ripassare (${rip.length})</h3>
+        ${rip.length ? `<div class="chips">${rip.map(t => `<button type="button" class="chip" data-t="${esc(t)}">${esc(TERM[t].t)}</button>`).join("")}</div>` : '<p class="muted">Il mazzo è vuoto.</p>'}
+        <h3>Diario</h3>
+        ${diario.length ? `<ol class="diario">${diario.map(d => `<li><time>${esc(quando(d.q, false))}</time><span>${testoEvento(d)}</span></li>`).join("")}</ol>`
+          : '<p class="muted">Ancora niente: il diario si riempie mentre gioca.</p>'}
+        <div class="row"><button class="btn" type="button" id="copia">Copia il riepilogo</button></div>
+        <textarea id="riep" class="riep" readonly hidden aria-label="Riepilogo da copiare"></textarea>`);
+      collegaCopia(() => riepilogo(st, s.nome));
     });
   }
 
@@ -831,17 +924,21 @@ function gioco(L, salvato, rete) {
   function route() {
     const h = location.hash.slice(1) || "mappa";
     const m = h.match(/^livello-(\d+)(?:-(impara|sfida|missioni))?$/);
-    if (guardo && h !== "pagella") { S = mio; guardo = null; }
+    const stud = rete.tutor && h.match(/^studente-([0-9a-f-]{36})$/);
     hud();
     if (m) { navAttiva("mappa"); vistaLivello(+m[1], m[2] || "impara"); }
     else if (h === "glossario") { navAttiva("glossario"); vistaGlossario(); }
     else if (h === "ripasso") { navAttiva("ripasso"); vistaRipasso(); }
-    else if (h === "pagella") { navAttiva("pagella"); vistaPagella(); }
+    else if (h === "punteggio") { navAttiva("punteggio"); vistaPunteggio(); }
+    else if (rete.tutor && h === "studenti") { navAttiva("studenti"); vistaStudenti(); }
+    else if (stud) { navAttiva("studenti"); vistaStudente(stud[1]); }
     else { navAttiva("mappa"); vistaMappa(); }
   }
   window.addEventListener("hashchange", () => { route(); window.scrollTo(0, 0); });
   $("#chi").textContent = rete.nome;
   $("#esci").addEventListener("click", rete.esci);
+  $("#tab-studenti").hidden = !rete.tutor;
+  if (annota({ e: "entra" }, 30)) salva();
   route();
 }
 
@@ -924,8 +1021,17 @@ function gioco(L, salvato, rete) {
       nome: (profilo && profilo.nome) || utente.email,
       tutor: !!profilo && profilo.ruolo === "tutor",
       salva,
-      studenti: () => sb.from("profili").select("utente, nome").neq("utente", utente.id).order("nome").then(dati),
-      statoDi: id => sb.from("progressi").select("stato, aggiornato_il").eq("utente", id).maybeSingle().then(dati),
+      // Solo per il tutor (le regole del database non danno ad altri i dati degli studenti).
+      classe: async () => {
+        const [pf, pr] = await Promise.all([
+          sb.from("profili").select("utente, nome, ruolo").eq("ruolo", "studente").order("nome").then(dati),
+          sb.from("progressi").select("utente, stato, aggiornato_il").neq("utente", utente.id).then(dati)
+        ]);
+        return pf.map(p => {
+          const r = pr.find(x => x.utente === p.utente);
+          return { utente: p.utente, nome: p.nome, stato: r ? r.stato : null, quando: r ? r.aggiornato_il : null };
+        });
+      },
       esci: async () => {
         try { await sb.auth.signOut({ scope: "local" }); } finally { location.hash = ""; location.reload(); }
       }
